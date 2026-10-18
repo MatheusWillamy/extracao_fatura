@@ -1,8 +1,9 @@
 services:
-  extracao_fatura:
+  eleveit01_extracao_fatura:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: eleveit01_extracao_fatura
     restart: unless-stopped
     expose:
       - "8000"
