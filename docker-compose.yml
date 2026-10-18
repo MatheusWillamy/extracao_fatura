@@ -1,5 +1,5 @@
 services:
-  api-extracao-fatura:
+  extracao_fatura:
     build:
       context: .
       dockerfile: Dockerfile

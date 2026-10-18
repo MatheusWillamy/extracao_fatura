@@ -38,21 +38,24 @@ class Base64InvoiceRequest(BaseModel):
 
 async def _get_pdf_bytes_from_request(
     request: Request,
-    file: Optional[UploadFile] = None
+    upload: Optional[UploadFile] = None
 ) -> bytes:
-    """Extracts PDF bytes from multipart upload, raw body, or JSON base64."""
-    # 1. Multipart form file
-    if file is not None:
-        return await file.read()
+    """Extrai os bytes do PDF a partir de upload binário direto (.pdf via multipart/form-data), corpo binário puro, ou JSON com base64."""
+    # 1. Arquivo binário direto via multipart (qualquer campo como 'file', 'data', etc.)
+    if upload is not None and hasattr(upload, "read"):
+        content = await upload.read()
+        if content:
+            return content
 
-    # 2. Check Content-Type
     content_type = request.headers.get("content-type", "").lower()
 
+    # 2. Envio binário puro (application/pdf ou application/octet-stream)
     if "application/pdf" in content_type or "application/octet-stream" in content_type:
         raw_body = await request.body()
         if raw_body:
             return raw_body
 
+    # 3. Envio opcional via JSON com Base64
     if "application/json" in content_type:
         try:
             body_json = await request.json()
@@ -63,21 +66,20 @@ async def _get_pdf_bytes_from_request(
                 body_json.get("content")
             )
             if b64_str:
-                # Remove data:application/pdf;base64, prefix if present
                 if "," in b64_str:
                     b64_str = b64_str.split(",")[1]
                 return base64.b64decode(b64_str)
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Erro ao decodificar JSON/Base64: {str(e)}")
 
-    # 3. Fallback: try raw body
+    # 4. Fallback: verificar se o corpo puro começa com a assinatura de PDF
     raw_body = await request.body()
     if raw_body and raw_body.startswith(b"%PDF"):
         return raw_body
 
     raise HTTPException(
         status_code=400,
-        detail="Nenhum arquivo PDF fornecido. Envie via multipart/form-data (campo 'file'), corpo binário application/pdf, ou JSON com base64 ('file_base64'/'data')."
+        detail="Nenhum arquivo PDF encontrado. Envie o arquivo .pdf direto via form-data (campo 'file' ou 'data'), corpo binário puro, ou JSON com base64."
     )
 
 
@@ -107,6 +109,8 @@ def health():
 async def extract_invoice_endpoint(
     request: Request,
     file: Optional[UploadFile] = File(None),
+    data: Optional[UploadFile] = File(None),
+    attachment: Optional[UploadFile] = File(None),
     mode: str = Query("auto", description="Modo de extração: 'auto', 'structured' ou 'ai'"),
     wrap_output: bool = Query(True, description="Inclui chave 'output' aninhada para compatibilidade total com n8n"),
     x_api_key: Optional[str] = Header(None, description="Chave de API de IA opcional se modo 'ai' for usado")
@@ -116,7 +120,8 @@ async def extract_invoice_endpoint(
     Compatível diretamente com o n8n e FlutterFlow.
     """
     try:
-        pdf_bytes = await _get_pdf_bytes_from_request(request, file)
+        uploaded_file = file or data or attachment
+        pdf_bytes = await _get_pdf_bytes_from_request(request, uploaded_file)
         
         # Check if json body requested a specific mode or wrap_output
         if request.headers.get("content-type", "").startswith("application/json"):
