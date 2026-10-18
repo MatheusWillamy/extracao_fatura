@@ -5,12 +5,10 @@ services:
       dockerfile: Dockerfile
     container_name: eleveit01_extracao_fatura
     restart: unless-stopped
+    ports:
+      - "8000:8000"
     expose:
       - "8000"
-    # Se estiver rodando localmente no seu computador e precisar acessar via localhost:8000,
-    # descomente o bloco 'ports' abaixo. No Easypanel, use a aba 'Domains' para apontar à porta 8000.
-    # ports:
-    #   - "8000:8000"
     environment:
       - PORT=8000
       # Opcional: Se quiser usar fallback de IA (Gemini ou OpenRouter)
@@ -22,4 +20,12 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
+    networks:
+      - default
+      - easypanel
+
+networks:
+  easypanel:
+    external: true
+
 
