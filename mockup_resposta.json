@@ -1,0 +1,96 @@
+{
+  "creditos_utlizados": [
+    {
+      "quantidade": 453.26,
+      "unidade": "kWh"
+    }
+  ],
+  "creditos_valor": -304.62,
+  "energia_atv_inj_TE_valor": [
+    {
+      "mes": 8,
+      "ano": 2025,
+      "valor": -145.86
+    }
+  ],
+  "energia_atv_inj_TUSD_valor": [
+    {
+      "mes": 8,
+      "ano": 2025,
+      "valor": -158.76
+    }
+  ],
+  "bandeira": "Vermelha",
+  "bandeira_valor": 29.07,
+  "data_vencimento": "2025-08-14",
+  "subtotal": 265.29,
+  "total_a_pagar": 265.29,
+  "leitura_anterior": "2025-07-03T00:00:00-03:00",
+  "leitura_atual": "2025-08-04T00:00:00-03:00",
+  "tipo_ligacao_eletrica": "TRIFÁSICO",
+  "cnpj-cpf": {
+    "cpf": true,
+    "cnpj": false,
+    "cpf_valor": "105.432.952-49",
+    "cnpj_valor": "undefined"
+  },
+  "endereco": {
+    "nome da empresa": "AUGUSTO SERGIO FARIA DE MESQUITA",
+    "endereço": "RU MARCOS MACEDO 00843 AP 1101 ALDEOTA FORTALEZA CE",
+    "cep": "60150-190"
+  },
+  "CIP_ILUM_PUB_PREF_MUNICIPAL": 65.09,
+  "juros_valor": 0.0,
+  "multa_valor": 0.0,
+  "bandeira_dados": {
+    "adic_band_comp": -29.07,
+    "adicional_band": 34.37
+  },
+  "lista_itens_fatura": [
+    {
+      "nome_item": "CIP ILUM PUB PREF MUNICIPAL",
+      "valor": 65.09,
+      "valor_positivo": true
+    },
+    {
+      "nome_item": "Adicional Band. Vermelha",
+      "valor": 34.37,
+      "valor_positivo": true
+    },
+    {
+      "nome_item": "Energia Consumida Faturada TE",
+      "valor": 26.61,
+      "valor_positivo": true
+    },
+    {
+      "nome_item": "Energia Ativa Fornecida TE",
+      "valor": 145.86,
+      "valor_positivo": true
+    },
+    {
+      "nome_item": "Adic. Band. Vermelha Comp.",
+      "valor": 29.07,
+      "valor_positivo": false
+    },
+    {
+      "nome_item": "Energia Atv Inj TE oUC 08/2025 mPT GD2",
+      "valor": 145.86,
+      "valor_positivo": false
+    },
+    {
+      "nome_item": "Energia Atv Inj TUSD oUC 08/2025 mPT GD2",
+      "valor": 158.76,
+      "valor_positivo": false
+    },
+    {
+      "nome_item": "Energia Ativa Fornecida TUSD",
+      "valor": 276.57,
+      "valor_positivo": true
+    },
+    {
+      "nome_item": "Energia Consumida Faturada TUSD",
+      "valor": 50.48,
+      "valor_positivo": true
+    }
+  ]
+}

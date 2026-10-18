@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  api-extracao-fatura:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: api_extracao_enel
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      # Opcional: Se quiser usar fallback de IA (Gemini ou OpenRouter)
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - GEMINI_MODEL=gemini-2.5-flash
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health')\" || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
