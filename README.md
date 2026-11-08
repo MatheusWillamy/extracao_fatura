@@ -161,17 +161,17 @@ curl -X POST "http://localhost:8000/extract" \
     },
     {
       "nome_item": "Adic. Band. Vermelha Comp.",
-      "valor": 29.07,
+      "valor": -29.07,
       "valor_positivo": false
     },
     {
       "nome_item": "Energia Atv Inj TE oUC 08/2025 mPT GD2",
-      "valor": 145.86,
+      "valor": -145.86,
       "valor_positivo": false
     },
     {
       "nome_item": "Energia Atv Inj TUSD oUC 08/2025 mPT GD2",
-      "valor": 158.76,
+      "valor": -158.76,
       "valor_positivo": false
     }
   ],

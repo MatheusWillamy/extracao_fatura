@@ -77,6 +77,8 @@ def _clean_number(val_str: str) -> float:
     cleaned = s.replace('-', '').replace('.', '').replace(',', '.')
     try:
         n = float(cleaned)
+        if n == 0.0:
+            return 0.0
         return -n if is_neg else n
     except ValueError:
         return 0.0
@@ -171,58 +173,61 @@ def parse_fatura_pdf(pdf_source: Union[str, bytes, io.BytesIO]) -> Dict[str, Any
     
     for l in raw_item_lines:
         # Check CIP ILUM PUB PREF MUNICIPAL
-        m_cip = re.search(r"CIP ILUM PUB PREF MUNICIPAL\s+([0-9.,]+)", l, re.IGNORECASE)
+        m_cip = re.search(r"CIP ILUM PUB PREF MUNICIPAL\s+(-?[0-9.,]+-?)", l, re.IGNORECASE)
         if m_cip:
-            val = abs(_clean_number(m_cip.group(1)))
+            val = round(_clean_number(m_cip.group(1)), 2)
+            if val == 0.0:
+                val = 0.0
             cip_valor = val
             lista_itens.append({
                 "nome_item": "CIP ILUM PUB PREF MUNICIPAL",
                 "valor": val,
-                "valor_positivo": True
+                "valor_positivo": val >= 0
             })
             continue
             
         # Check Juros Moratórios
-        m_juros = re.search(r"Juros Morat[oó]rios\s+([0-9.,]+)", l, re.IGNORECASE)
+        m_juros = re.search(r"Juros Morat[oó]rios\s+(-?[0-9.,]+-?)", l, re.IGNORECASE)
         if m_juros:
-            val = abs(_clean_number(m_juros.group(1)))
+            val = round(_clean_number(m_juros.group(1)), 2)
+            if val == 0.0:
+                val = 0.0
             juros_valor = val
             lista_itens.append({
                 "nome_item": "Juros Moratórios",
                 "valor": val,
-                "valor_positivo": True
+                "valor_positivo": val >= 0
             })
             continue
             
         # Check Multa
-        m_multa = re.search(r"^Multa\s+([0-9.,]+)", l, re.IGNORECASE)
+        m_multa = re.search(r"^Multa\s+(-?[0-9.,]+-?)", l, re.IGNORECASE)
         if m_multa:
-            val = abs(_clean_number(m_multa.group(1)))
+            val = round(_clean_number(m_multa.group(1)), 2)
+            if val == 0.0:
+                val = 0.0
             multa_valor = val
             lista_itens.append({
                 "nome_item": "Multa",
                 "valor": val,
-                "valor_positivo": True
+                "valor_positivo": val >= 0
             })
             continue
 
         # Standard energy item line:
         # <nome_item> kWh <quant> <preco_unit>[-] <valor>[-] ...
-        m_kwh = re.search(r"^(.*?)\s+kWh\s+([0-9.,]+)\s+([0-9.,]+-?)\s+([0-9.,]+-?)", l)
+        m_kwh = re.search(r"^(.*?)\s+kWh\s+(-?[0-9.,]+-?)\s+(-?[0-9.,]+-?)\s+(-?[0-9.,]+-?)", l)
         if m_kwh:
             nome_item = m_kwh.group(1).strip()
             valor_raw = m_kwh.group(4).strip()
-            is_neg = valor_raw.endswith('-') or valor_raw.startswith('-')
-            val_clean = valor_raw.replace('-', '').replace('.', '').replace(',', '.')
-            try:
-                val_num = round(float(val_clean), 2)
-            except Exception:
+            val_num = round(_clean_number(valor_raw), 2)
+            if val_num == 0.0:
                 val_num = 0.0
             
             lista_itens.append({
                 "nome_item": nome_item,
                 "valor": val_num,
-                "valor_positivo": not is_neg
+                "valor_positivo": val_num >= 0
             })
             
             # Energia Atv Inj TE oUC
@@ -231,11 +236,10 @@ def parse_fatura_pdf(pdf_source: Union[str, bytes, io.BytesIO]) -> Dict[str, Any
                 if m_date:
                     mes = int(m_date.group(1))
                     ano = int(m_date.group(2))
-                    item_val = -val_num if is_neg else val_num
                     energia_te_items.append({
                         "mes": mes,
                         "ano": ano,
-                        "valor": item_val
+                        "valor": val_num
                     })
                     
             # Energia Atv Inj TUSD oUC
@@ -244,20 +248,19 @@ def parse_fatura_pdf(pdf_source: Union[str, bytes, io.BytesIO]) -> Dict[str, Any
                 if m_date:
                     mes = int(m_date.group(1))
                     ano = int(m_date.group(2))
-                    item_val = -val_num if is_neg else val_num
                     energia_tusd_items.append({
                         "mes": mes,
                         "ano": ano,
-                        "valor": item_val
+                        "valor": val_num
                     })
                     
             if "Adic. Band." in nome_item and "Comp." in nome_item:
-                adic_band_comp_val = -val_num if is_neg else val_num
+                adic_band_comp_val = val_num
                 m_col = re.search(r"Adic\.\s*Band\.\s*([A-Za-z]+)\s*Comp\.", nome_item, re.IGNORECASE)
                 if m_col:
                     detected_band_color = m_col.group(1).capitalize()
             elif "Adicional Band." in nome_item:
-                adicional_band_val = -val_num if is_neg else val_num
+                adicional_band_val = val_num
                 m_col = re.search(r"Adicional\s*Band\.\s*([A-Za-z]+)", nome_item, re.IGNORECASE)
                 if m_col:
                     detected_band_color = m_col.group(1).capitalize()

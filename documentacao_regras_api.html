@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Documentação Técnica — API e Regras de Extração de Faturas Enel</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --bg-elev: #121931;
+      --bg-card: #161f3d;
+      --bg-code: #090e1c;
+      --border: #26335c;
+      --text: #e6ecff;
+      --text-muted: #9aa9d6;
+      --accent: #5b8cff;
+      --accent-soft: rgba(91, 140, 255, 0.14);
+      --green: #22c55e;
+      --green-soft: rgba(34, 197, 94, 0.14);
+      --red: #f43f5e;
+      --red-soft: rgba(244, 63, 94, 0.14);
+      --amber: #f59e0b;
+      --amber-soft: rgba(245, 158, 11, 0.14);
+      --purple: #a855f7;
+      --purple-soft: rgba(168, 85, 247, 0.14);
+      --cyan: #06b6d4;
+      --cyan-soft: rgba(6, 182, 212, 0.14);
+      --radius: 12px;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      font-size: 15px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 290px 1fr;
+      min-height: 100vh;
+    }
+
+    aside.sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      background: var(--bg-elev);
+      border-right: 1px solid var(--border);
+      padding: 20px 16px;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 14px;
+    }
+    .brand h1 {
+      font-size: 16px;
+      margin: 0;
+      color: #fff;
+      letter-spacing: -0.01em;
+    }
+    .brand span {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .search-box {
+      width: 100%;
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 11px;
+      color: var(--text);
+      font-size: 13px;
+      margin-bottom: 10px;
+      outline: none;
+    }
+    .search-box:focus { border-color: var(--accent); }
+
+    .filter-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .pill-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .pill-btn:hover { border-color: var(--accent); color: var(--text); }
+    .pill-btn.active {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .nav-group-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin: 14px 0 6px;
+      padding-left: 6px;
+      font-weight: 700;
+    }
+    .nav-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      padding: 6px 8px;
+      border-radius: 7px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13px;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+    .nav-link:hover { background: var(--bg-card); color: #fff; }
+    .nav-link code { font-size: 12px; color: inherit; background: none; padding: 0; }
+
+    main.content {
+      padding: 28px 36px 72px;
+      max-width: 1160px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, rgba(91, 140, 255, 0.16), rgba(6, 182, 212, 0.08));
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px 28px;
+      margin-bottom: 24px;
+    }
+    .hero h2 { margin: 0 0 8px; font-size: 24px; color: #fff; }
+    .hero p { margin: 0 0 14px; color: var(--text-muted); }
+
+    .hero-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .stat-chip {
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 12px;
+      color: var(--text);
+    }
+
+    section.block { margin-bottom: 34px; }
+    h2.section-title {
+      font-size: 20px;
+      margin: 0 0 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+      color: #fff;
+    }
+    h3.sub-title {
+      font-size: 16px;
+      margin: 18px 0 10px;
+      color: #dbe6ff;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      margin-bottom: 16px;
+    }
+
+    .field-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 22px;
+      margin-bottom: 20px;
+    }
+    .field-card.hidden { display: none; }
+
+    .field-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 14px;
+    }
+    .field-name {
+      font-family: var(--font-mono);
+      font-size: 17px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 999px;
+      letter-spacing: 0.02em;
+      border: 1px solid transparent;
+    }
+    .badge-type { background: var(--accent-soft); color: #9fc0ff; border-color: rgba(91, 140, 255, 0.35); }
+    .badge-pos { background: var(--green-soft); color: #6ee7b7; border-color: rgba(34, 197, 94, 0.35); }
+    .badge-neg { background: var(--red-soft); color: #fda4af; border-color: rgba(244, 63, 94, 0.35); }
+    .badge-both { background: var(--purple-soft); color: #d8b4fe; border-color: rgba(168, 85, 247, 0.35); }
+    .badge-date { background: var(--cyan-soft); color: #67e8f9; border-color: rgba(6, 182, 212, 0.35); }
+    .badge-warn { background: var(--amber-soft); color: #fcd34d; border-color: rgba(245, 158, 11, 0.35); }
+
+    code {
+      font-family: var(--font-mono);
+      background: var(--bg-code);
+      padding: 2px 6px;
+      border-radius: 5px;
+      font-size: 13px;
+      color: #a5c9ff;
+    }
+    pre {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 13px 15px;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      line-height: 1.5;
+      color: #d6e4ff;
+      margin: 8px 0 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0 14px;
+      font-size: 13.5px;
+      background: var(--bg-elev);
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    th, td {
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    th {
+      background: rgba(91, 140, 255, 0.08);
+      color: #fff;
+      font-weight: 700;
+      font-size: 12.5px;
+    }
+    tr:last-child td { border-bottom: none; }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 12px;
+    }
+
+    .box-cover {
+      background: rgba(34, 197, 94, 0.07);
+      border: 1px solid rgba(34, 197, 94, 0.32);
+      border-radius: 10px;
+      padding: 13px 15px;
+    }
+    .box-nocover {
+      background: rgba(244, 63, 94, 0.07);
+      border: 1px solid rgba(244, 63, 94, 0.32);
+      border-radius: 10px;
+      padding: 13px 15px;
+    }
+    .box-cover h4 { margin: 0 0 8px; color: #6ee7b7; font-size: 13.5px; }
+    .box-nocover h4 { margin: 0 0 8px; color: #fda4af; font-size: 13.5px; }
+    .box-cover ul, .box-nocover ul { margin: 0; padding-left: 18px; }
+    .box-cover li, .box-nocover li { margin-bottom: 6px; font-size: 13.5px; }
+
+    .micro-box {
+      background: rgba(6, 182, 212, 0.07);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      border-radius: 10px;
+      padding: 12px 15px;
+      margin: 10px 0;
+    }
+    .micro-box h4 { margin: 0 0 6px; color: #67e8f9; font-size: 13.5px; }
+
+    .pipeline {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin: 8px 0;
+    }
+    .step {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: #dbeafe;
+    }
+    .arrow { color: var(--cyan); font-weight: 700; }
+
+    .callout-warn {
+      background: var(--amber-soft);
+      border: 1px solid rgba(245, 158, 11, 0.38);
+      border-radius: 10px;
+      padding: 12px 15px;
+      margin: 12px 0;
+      font-size: 13.5px;
+      color: #fde68a;
+    }
+
+    .empty-state {
+      display: none;
+      text-align: center;
+      padding: 32px;
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 980px) {
+      .layout { grid-template-columns: 1fr; }
+      aside.sidebar { position: relative; height: auto; border-right: none; border-bottom: 1px solid var(--border); }
+      main.content { padding: 20px 16px 48px; }
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">
+      <h1>Extração de Faturas API</h1>
+      <span>v1.1.0 • FastAPI + Parser Determinístico</span>
+    </div>
+
+    <input id="searchInput" class="search-box" type="search" placeholder="Buscar campo, regex, exemplo..." />
+
+    <div class="filter-pills" id="filterPills">
+      <button class="pill-btn active" data-filter="all">Todos</button>
+      <button class="pill-btn" data-filter="negativo">Negativos</button>
+      <button class="pill-btn" data-filter="positivo">Positivos</button>
+      <button class="pill-btn" data-filter="data">Datas / Hora</button>
+      <button class="pill-btn" data-filter="lista">Listas / Itens</button>
+    </div>
+
+    <div class="nav-group-title">API &amp; Regras Globais</div>
+    <a class="nav-link" href="#sec-api">Endpoints &amp; Entrada PDF</a>
+    <a class="nav-link" href="#sec-modes">Modos (auto / structured / ai)</a>
+    <a class="nav-link" href="#sec-micro">Micro-análise Numérica &amp; Sinais</a>
+
+    <div class="nav-group-title">Campos Extraídos (19 + Alias)</div>
+    <a class="nav-link" href="#campo-creditos-utilizados"><code>creditos_utlizados</code></a>
+    <a class="nav-link" href="#campo-creditos-valor"><code>creditos_valor</code></a>
+    <a class="nav-link" href="#campo-energia-inj"><code>energia_atv_inj_TE / TUSD</code></a>
+    <a class="nav-link" href="#campo-bandeira"><code>bandeira</code></a>
+    <a class="nav-link" href="#campo-bandeira-valor"><code>bandeira_valor &amp; dados</code></a>
+    <a class="nav-link" href="#campo-vencimento"><code>data_vencimento</code></a>
+    <a class="nav-link" href="#campo-totais"><code>subtotal &amp; total_a_pagar</code></a>
+    <a class="nav-link" href="#campo-leituras"><code>leitura_anterior / atual / tipo</code></a>
+    <a class="nav-link" href="#campo-cnpj"><code>cnpj-cpf / cnpj_cpf</code></a>
+    <a class="nav-link" href="#campo-endereco"><code>endereco</code></a>
+    <a class="nav-link" href="#campo-encargos"><code>CIP / juros / multa</code></a>
+    <a class="nav-link" href="#campo-lista-itens"><code>lista_itens_fatura</code></a>
+
+    <div class="nav-group-title">Faturas Reais</div>
+    <a class="nav-link" href="#sec-exemplos-reais">Exemplos Completos</a>
+  </aside>
+
+  <main class="content">
+    <div class="hero">
+      <h2>Especificação Completa: API e Regras de Extração de Faturas</h2>
+      <p>
+        Documentação fiel à implementação real em <code>main.py</code> e <code>extractor.py</code>:
+        rotas HTTP, regras de sinal (<strong>positivo vs. negativo</strong>), micro-análises de
+        <strong>dia, mês, ano, fuso e números</strong>, além de exemplos práticos do que o motor <strong>cobre</strong> e do que <strong>não cobre</strong>.
+      </p>
+      <div class="hero-stats">
+        <div class="stat-chip">Endpoints POST: <code>/extract</code>, <code>/homo_extracao_enel</code>, <code>/webhook</code></div>
+        <div class="stat-chip">19 campos canônicos + alias <code>cnpj_cpf</code> + wrapper <code>output</code></div>
+        <div class="stat-chip">Regra estrita: crédito em <code>lista_itens_fatura</code> tem <code>valor &lt; 0</code> e <code>valor_positivo: false</code></div>
+      </div>
+    </div>
+
+    <!-- SEÇÃO 1: API -->
+    <section class="block" id="sec-api">
+      <h2 class="section-title">1. Endpoints e Formas de Envio da API</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Método</th>
+            <th>Rota</th>
+            <th>Função</th>
+            <th>Observações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>GET</code></td>
+            <td><code>/</code></td>
+            <td>Status e lista de rotas</td>
+            <td>Retorna <code>version: "1.1.0"</code> e mapa de endpoints</td>
+          </tr>
+          <tr>
+            <td><code>GET</code></td>
+            <td><code>/health</code></td>
+            <td>Healthcheck</td>
+            <td>Usado pelo Docker/Easypanel (<code>{"status": "ok"}</code>)</td>
+          </tr>
+          <tr>
+            <td><code>POST</code></td>
+            <td><code>/extract</code></td>
+            <td>Extração principal</td>
+            <td>Aceita multipart, binário bruto ou JSON Base64</td>
+          </tr>
+          <tr>
+            <td><code>POST</code></td>
+            <td><code>/homo_extracao_enel</code></td>
+            <td>Webhook compatível n8n</td>
+            <td>Mesmo handler de <code>/extract</code></td>
+          </tr>
+          <tr>
+            <td><code>POST</code></td>
+            <td><code>/webhook</code></td>
+            <td>Webhook genérico</td>
+            <td>Mesmo handler de <code>/extract</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="card">
+        <h3 class="sub-title" style="margin-top:0;">Prioridade de leitura do PDF (<code>_get_pdf_bytes_from_request</code>)</h3>
+        <div class="pipeline">
+          <div class="step">1. Multipart (<code>file</code> || <code>data</code> || <code>attachment</code>)</div>
+          <span class="arrow">→</span>
+          <div class="step">2. Binário <code>application/pdf</code> / <code>octet-stream</code></div>
+          <span class="arrow">→</span>
+          <div class="step">3. JSON Base64 (<code>file_base64</code>/<code>data</code>/<code>file</code>/<code>content</code>)</div>
+          <span class="arrow">→</span>
+          <div class="step">4. Assinatura inicial <code>%PDF</code></div>
+        </div>
+        <div class="grid-2">
+          <div class="box-cover">
+            <h4>O que a entrada da API COBRE</h4>
+            <ul>
+              <li>Upload multipart nos campos <code>file</code>, <code>data</code> ou <code>attachment</code>.</li>
+              <li>Body binário puro com <code>Content-Type: application/pdf</code> ou <code>application/octet-stream</code>.</li>
+              <li>JSON com Base64 puro ou com prefixo Data URI (<code>data:application/pdf;base64,...</code>).</li>
+              <li>CORS aberto (<code>*</code>) para chamadas web (ex.: FlutterFlow Web).</li>
+            </ul>
+          </div>
+          <div class="box-nocover">
+            <h4>O que a entrada da API NÃO COBRE</h4>
+            <ul>
+              <li>Campos multipart com outros nomes (ex.: <code>pdf</code>, <code>arquivo</code>, <code>documento</code>) → erro <code>HTTP 400</code>.</li>
+              <li>JSON enviando apenas URL externa para download do PDF.</li>
+              <li>Upload múltiplo/em lote em uma única requisição.</li>
+              <li>Imagens (<code>PNG/JPG</code>) ou PDFs escaneados sem texto vetorial (sem OCR).</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEÇÃO 2: MODOS -->
+    <section class="block" id="sec-modes">
+      <h2 class="section-title">2. Modos de Extração, Wrapper e Compatibilidade</h2>
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>Parâmetro</th>
+              <th>Onde enviar</th>
+              <th>Padrão</th>
+              <th>Comportamento exato</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>mode</code></td>
+              <td>Query ou JSON Body</td>
+              <td><code>"auto"</code></td>
+              <td>
+                <strong><code>structured</code>:</strong> só parser Python.<br/>
+                <strong><code>ai</code>:</strong> envia <code>pdf_text[:12000]</code> para Gemini/OpenRouter/OpenAI.<br/>
+                <strong><code>auto</code>:</strong> roda Python; só faz fallback de IA se (<code>total_a_pagar == 0.0</code> e <code>lista_itens_fatura == []</code>) ou se ocorrer exceção, exigindo chave em <code>x-api-key</code>, <code>GEMINI_API_KEY</code> ou <code>OPENROUTER_API_KEY</code>.
+              </td>
+            </tr>
+            <tr>
+              <td><code>wrap_output</code></td>
+              <td>Query ou JSON Body</td>
+              <td><code>true</code></td>
+              <td>Quando <code>true</code>, retorna todos os campos na raiz <strong>e</strong> dentro de <code>"output": { ... }</code> (padrão do nó Information Extractor do n8n).</td>
+            </tr>
+            <tr>
+              <td><code>x-api-key</code></td>
+              <td>Header HTTP</td>
+              <td><code>None</code></td>
+              <td>Sobrescreve variáveis de ambiente para chamadas de IA.</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="callout-warn">
+          <strong>Micro-detalhes importantes de comportamento:</strong>
+          (1) No modo <code>auto</code>, configurar apenas <code>OPENAI_API_KEY</code> não aciona fallback automático (o cheque de fallback testa só <code>api_key</code>, <code>GEMINI_API_KEY</code> e <code>OPENROUTER_API_KEY</code>); use <code>mode=ai</code> ou passe em <code>x-api-key</code>.
+          (2) No modo <code>ai</code>, apenas os primeiros 12.000 caracteres do texto extraído via <code>pypdf</code> são enviados (não envia PDF como imagem).
+          (3) <code>format_api_response</code> sempre garante o alias <code>"cnpj_cpf"</code> além de <code>"cnpj-cpf"</code>.
+        </div>
+      </div>
+    </section>
+
+    <!-- SEÇÃO 3: MICRO-ANALISES GLOBAIS -->
+    <section class="block" id="sec-micro">
+      <h2 class="section-title">3. Micro-Análises Globais: Números e Regras de Sinal</h2>
+      <div class="card">
+        <h3 class="sub-title" style="margin-top:0;">Função <code>_clean_number(val_str)</code></h3>
+        <div class="pipeline">
+          <div class="step">"3.214,70-"</div>
+          <span class="arrow">→</span>
+          <div class="step">detecta '-' no início ou fim (<code>is_neg=True</code>)</div>
+          <span class="arrow">→</span>
+          <div class="step">remove '-' e '.' (milhar) → "3214,70"</div>
+          <span class="arrow">→</span>
+          <div class="step">troca ',' por '.' → "3214.70"</div>
+          <span class="arrow">→</span>
+          <div class="step"><code>-3214.7</code> (se 0 retorna <code>0.0</code>)</div>
+        </div>
+        <div class="grid-2">
+          <div class="box-cover">
+            <h4>O que <code>_clean_number</code> COBRE</h4>
+            <ul>
+              <li>Sinal à direita (padrão Enel): <code>"142,88-"</code> → <code>-142.88</code></li>
+              <li>Sinal à esquerda: <code>"-142,88"</code> → <code>-142.88</code></li>
+              <li>Milhar com ponto: <code>"2.594,60"</code> → <code>2594.6</code></li>
+              <li>Zero negativo: <code>"0,00-"</code> → <code>0.0</code> (evita <code>-0.0</code>)</li>
+            </ul>
+          </div>
+          <div class="box-nocover">
+            <h4>O que <code>_clean_number</code> NÃO COBRE</h4>
+            <ul>
+              <li>Número no formato US (<code>"142.88"</code> vira <code>14288.0</code> porque <code>.</code> é removido como milhar).</li>
+              <li>Espaço entre sinal e número (ex.: <code>"- 142,88"</code>).</li>
+              <li>Moeda ou texto junto ao número (ex.: <code>"R$ 142,88"</code>).</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3 class="sub-title">Matriz de Sinais (Positivo vs. Negativo) por Campo</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Campo</th>
+              <th>Regra de Sinal</th>
+              <th>Exemplo Positivo</th>
+              <th>Exemplo Negativo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>lista_itens_fatura[*].valor</code></td>
+              <td><span class="badge badge-both">Preserva + e -</span></td>
+              <td><code>2594.6</code> + <code>valor_positivo: true</code></td>
+              <td><code>-142.88</code> + <code>valor_positivo: false</code></td>
+            </tr>
+            <tr>
+              <td><code>creditos_valor</code></td>
+              <td><span class="badge badge-neg">Soma com sinal (-)</span></td>
+              <td><code>0.0</code> (sem injeção)</td>
+              <td><code>-5986.62</code></td>
+            </tr>
+            <tr>
+              <td><code>energia_atv_inj_TE_valor[*].valor</code></td>
+              <td><span class="badge badge-neg">Preserva sinal (-)</span></td>
+              <td>—</td>
+              <td><code>-145.86</code></td>
+            </tr>
+            <tr>
+              <td><code>energia_atv_inj_TUSD_valor[*].valor</code></td>
+              <td><span class="badge badge-neg">Preserva sinal (-)</span></td>
+              <td>—</td>
+              <td><code>-158.76</code></td>
+            </tr>
+            <tr>
+              <td><code>bandeira_dados.adic_band_comp</code></td>
+              <td><span class="badge badge-neg">Preserva sinal (-)</span></td>
+              <td><code>0.0</code> (ausente)</td>
+              <td><code>-29.07</code></td>
+            </tr>
+            <tr>
+              <td><code>bandeira_dados.adicional_band</code></td>
+              <td><span class="badge badge-pos">Preserva sinal (+)</span></td>
+              <td><code>34.37</code></td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td><code>bandeira_valor</code></td>
+              <td><span class="badge badge-pos">Sempre abs (&gt;= 0)</span></td>
+              <td><code>29.07</code> ou <code>0</code></td>
+              <td>Nunca negativo</td>
+            </tr>
+            <tr>
+              <td><code>subtotal</code> / <code>total_a_pagar</code></td>
+              <td><span class="badge badge-pos">Sempre abs (&gt;= 0)</span></td>
+              <td><code>265.29</code></td>
+              <td>Nunca negativo (aplica <code>abs</code>)</td>
+            </tr>
+            <tr>
+              <td><code>CIP_ILUM_PUB_PREF_MUNICIPAL</code> / <code>juros_valor</code> / <code>multa_valor</code></td>
+              <td><span class="badge badge-both">Tabela preserva / Fallback abs</span></td>
+              <td><code>65.09</code> / <code>0.45</code> / <code>6.7</code></td>
+              <td><code>-10.5</code> (se na tabela)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SEÇÃO 4: CAMPOS DETALHADOS -->
+    <section class="block" id="sec-campos">
+      <h2 class="section-title">4. Regras Detalhadas de Cada Campo</h2>
+      <div id="emptyState" class="empty-state">Nenhum campo corresponde ao filtro/busca atual.</div>
+
+      <!-- 4.1 creditos_utlizados -->
+      <article class="field-card" id="campo-creditos-utilizados" data-tags="positivo lista">
+        <div class="field-header">
+          <div class="field-name">creditos_utlizados <small style="color:var(--text-muted);font-weight:400;">(grafia sem 2º "i")</small></div>
+          <div class="badges">
+            <span class="badge badge-type">List[Dict]</span>
+            <span class="badge badge-pos">Sempre &gt;= 0</span>
+          </div>
+        </div>
+        <p><strong>Regex:</strong> <code>r"Saldo utilizado no m[eê]s:\s*([0-9.,]+)\s*([a-zA-Z]+)"</code> (case-insensitive). Fallback: <code>[{"quantidade": 0, "unidade": "kWh"}]</code>.</p>
+        <div class="micro-box">
+          <h4>Micro-análise de pontuação (milhar x decimal)</h4>
+          <p style="margin:0 0 8px;">Divide por ponto: <code>parts = qtd_str.split('.')</code>.</p>
+          <div class="pipeline">
+            <div class="step">"1.000.00" (3 partes)</div><span class="arrow">→</span>
+            <div class="step">junta antes do último ponto → "1000.00"</div><span class="arrow">→</span>
+            <div class="step"><code>is_integer()</code> → int <code>1000</code></div>
+          </div>
+          <div class="pipeline">
+            <div class="step">"1.660.20" (3 partes)</div><span class="arrow">→</span>
+            <div class="step">"1660.20"</div><span class="arrow">→</span>
+            <div class="step"><code>round(1660.2, 2)</code> → float <code>1660.2</code></div>
+          </div>
+          <div class="pipeline">
+            <div class="step">"453.26" (2 partes)</div><span class="arrow">→</span>
+            <div class="step">mantém "453.26"</div><span class="arrow">→</span>
+            <div class="step">float <code>453.26</code></div>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="box-cover">
+            <h4>Exemplos que COBRE</h4>
+            <ul>
+              <li><code>Saldo utilizado no mês: 453.26 kWh</code> → <code>453.26</code>, <code>"kWh"</code></li>
+              <li><code>Saldo utilizado no mês: 1.000.00 kWh</code> → <code>1000</code> (int)</li>
+              <li><code>Saldo utilizado no mes: 7.140.00 kWh</code> → <code>7140</code> (int)</li>
+              <li><code>Saldo utilizado no mês: 7140,50 kWh</code> → <code>7140.5</code></li>
+            </ul>
+          </div>
+          <div class="box-nocover">
+            <h4>Exemplos que NÃO COBRE</h4>
+            <ul>
+              <li><code>1.000,50 kWh</code> (1 ponto de milhar + vírgula): entra no ramo de 2 partes e falha no <code>float("1.000,50")</code>, virando <code>0</code>!</li>
+              <li><code>1.000 kWh</code> (1 ponto de milhar sem decimais): vira <code>1</code> (<code>1.0</code>) em vez de <code>1000</code>!</li>
+              <li>Rótulos diferentes (ex.: <code>"Crédito utilizado:"</code>) ou valores negativos.</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <!-- 4.2 creditos_valor -->
+      <article class="field-card" id="campo-creditos-valor" data-tags="negativo">
+        <div class="field-header">
+          <div class="field-name">creditos_valor</div>
+          <div class="badges">
+            <span class="badge badge-type">float</span>
+            <span class="badge badge-neg">Soma com sinal (-)</span>
+          </div>
+        </div>
+        <p><strong>Regra:</strong> <code>round(sum(energia_atv_inj_TE_valor) + sum(energia_atv_inj_TUSD_valor), 2)</code>. Preserva o sinal negativo dos créditos de injeção abatidos.</p>
+        <div class="grid-2">
+          <div class="box-cover">
+            <h4>Exemplos que COBRE</h4>
+            <ul>
+              <li>1 mês (TE <code>-145.86</code> + TUSD <code>-158.76</code>) → <code>-304.62</code>.</li>
+              <li>Múltiplos meses (<code>10/2024</code> + <code>11/2024</code>: <code>-142.88 - 2440.85 - 188.19 - 3214.70</code>) → <code>-5986.62</code>.</li>
+              <li>Fatura sem injeção → <code>0.0</code>.</li>
+            </ul>
+          </div>
+          <div class="box-nocover">
+            <h4>Exemplos que NÃO COBRE</h4>
+            <ul>
+              <li>Compensação de bandeira (<code>Adic. Band. ... Comp.</code>) <strong>não</strong> entra nesta soma.</li>
+              <li>Créditos sem a expressão literal <code>Energia Atv Inj TE oUC</code> ou <code>TUSD oUC</code> + data <code>MM/AAAA</code> + unidade <code>kWh</code>.</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <!-- 4.3 energia_atv_inj -->
+      <article class="field-card" id="campo-energia-inj" data-tags="negativo lista data">
+        <div class="field-header">
+          <div class="field-name">energia_atv_inj_TE_valor &amp; energia_atv_inj_TUSD_valor</div>
+          <div class="badges">
+            <span class="badge badge-type">List[{"mes": int, "ano": int, "valor": float}]</span>
+            <span class="badge badge-neg">Preserva sinal (-)</span>
+            <span class="badge badge-date">MM/AAAA → int</span>
+          </div>
+        </div>
+        <div class="micro-box">
+          <h4>Micro-análise para formar Mês, Ano e Valor</h4>
+          <p style="margin:0 0 6px;">1. A linha deve casar com a regex <code>kWh</code> na tabela de itens.</p>
+          <p style="margin:0 0 6px;">2. Verifica substring exata (<strong>case-sensitive</strong>): <code>"Energia Atv Inj TE oUC"</code> ou <code>"Energia Atv Inj TUSD oUC"</code>.</p>
+          <p style="margin:0 0 8px;">3. Extrai data no nome do item com <code>r"(\d{2})/(\d{4})"</code> e converte para inteiros.</p>
+          <div class="pipeline">
+            <div class="step">"Energia Atv Inj TE oUC 08/2025 mPT GD2 ... 145,86-"</div><span class="arrow">→</span>
+            <div class="step"><code>mes: int("08") = 8</code></div><span class="arrow">→</span>
+            <div class="step"><code>ano: int("2025") = 2025</code></div><span class="arrow">→</span>
+            <div class="step"><code>valor: -145.86</code></div>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="box-cover">
+            <h4>Exemplos que COBRE</h4>
+            <ul>
+              <li>Múltiplas competências na mesma fatura (ex.: <code>10/2024</code> e <code>11/2024</code>).</li>
+              <li>Sufixos variados após a data: <code>mPT</code>, <code>mPT GD2</code>, <code>GD1</code>.</li>
+              <li>Sinal à direita (<code>142,88-</code>) ou à esquerda (<code>-142,88</code>).</li>
+            </ul>
+          </div>
+          <div class="box-nocover">
+            <h4>Exemplos que NÃO COBRE</h4>
+            <ul>
+              <li>Ano de 2 dígitos (<code>08/25</code>) ou mês de 1 dígito (<code>8/2025</code>).</li>
+              <li>Caixa diferente (<code>ENERGIA ATV INJ TE OUC</code> falha no teste case-sensitive).</li>
+              <li>Outras modalidades como <code>mUC</code> / <code>aUC</code> sem <code>oUC</code>, ou unidade diferente de <code>kWh</code>.</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <!-- 4.4 bandeira -->
+      <article class="field-card" id="campo-bandeira" data-tags="positivo">
+        <div class="field-header">
+          <div class="field-name">bandeira</div>
+          <div class="badges">
+            <span class="badge badge-type">str</span>
+          </div>
+        </div>
+        <div class="micro-box">
+          <h4>Ordem de prioridade (4 níveis)</h4>
+          <ol style="margin:0;padding-left:18px;font-size:13.5px;">
+            <li>Cor extraída do item na tabela (<code>Adic. Band. &lt;Cor&gt; Comp.</code> ou <code>Adicional Band. &lt;Cor&gt;</code>).</li>
+            <li>Regex global: <code>r"Band(?:eira)?\.?\s*Tarif\.?:\s*([A-Za-z]+)"</code>.</li>
+            <li>Regex global: <code>r"Bandeira\s+([A-Za-z]+)"</code>.</li>
+            <li>Busca de substring no texto minúsculo (<code>amarela</code> → <code>vermelha</code> → <code>verde</code>), senão padrão <code>"Verde"</code>.</li>
+          </ol>
+        </div>
+        <div class="grid-2">
+          <div class="box-cover">
+            <h4>Exemplos que COBRE</h4>
+            <ul>
+              <li><code>Adic. Band. Amarela Comp.</code> → <code>"Amarela"</code>.</li>
+              <li><code>Períodos: Band. Tarif.: Vermelha : 04/07 - 04/08</code> → <code>"Vermelha"</code>.</li>
+              <li>Fatura sem menção adicional → <code>"Verde"</code>.</li>
+            </ul>
+          </div>
+          <div class="box-nocover">
+            <h4>Exemplos que NÃO COBRE</h4>
+            <ul>
+              <li>Patamar (não diferencia <code>"Vermelha"</code> patamar 1 de patamar 2).</li>
+              <li>Bandeira de duas palavras (ex.: <code>"Escassez Hídrica"</code> capturaria só a primeira palavra).</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <!-- 4.5 bandeira_valor e bandeira_dados -->
+      <article class="field-card" id="campo-bandeira-valor" data-tags="positivo negativo">
+        <div class="field-header">
+          <div class="field-name">bandeira_valor &amp; bandeira_dados</div>
+          <div class="badges">
+            <span class="badge badge-type">float/int &amp; Dict</span>
+            <span class="badge badge-pos">bandeira_valor: abs (&gt;=0)</span>
+            <span class="badge badge-both">bandeira_dados: comp (-) / adic (+)</span>
+          </div>
+        </div>
+        <p>
+          <strong><code>bandeira_valor</code>:</strong> retorna <code>abs(adic_band_comp_val)</code> se <code>adic_band_comp_val != 0.0</code>, senão <code>0</code>.<br/>
+          <strong><code>bandeira_dados</code>:</strong> <code>{"adic_band_comp": float, "adicional_band": float}</code> preservando o sinal de cada item da tabela.
+        </p>
+        <div class="grid-2">
+          <div class="box-cover">
+            <h4>Exemplos que COBRE</h4>
+            <ul>
+              <li>Com compensação e adicional (<code>29,07-</code> e <code>34,37</code>): <code>bandeira_valor: 29.07</code>, <code>adic_band_comp: -29.07</code>, <code>adicional_band: 34.37</code>.</li>
+              <li>Bandeira Verde: <code>bandeira_valor: 0</code>, ambos <code>0.0</code> em <code>bandeira_dados</code>.</li>
+            </ul>
+          </div>
+          <div class="box-nocover">
+            <h4>Exemplos que NÃO COBRE</h4>
+            <ul>
+              <li>Fatura sem compensação GD que tenha apenas <code>Adicional Band. Amarela 20,71</code> (sem <code>Comp.</code>): <code>adicional_band</code> fica <code>20.71</code>, mas <code>bandeira_valor</code> fica <code>0</code>.</li>
+              <li>Múltiplas linhas de bandeira de meses distintos (sobrescreve com a última, não soma).</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <!-- 4.6 data_vencimento -->
+      <article class="field-card" id="campo-vencimento" data-tags="data">
+        <div class="field-header">
+          <div class="field-name">data_vencimento</div>
+          <div class="badges">
+            <span class="badge badge-type">str (AAAA-MM-DD)</span>
+            <span class="badge badge-date">Micro-análise Dia/Mês/Ano</span>
+          </div>
+        </div>
+        <div class="micro-box">
+          <h4>Micro-análise de formação Dia, Mês e Ano</h4>
+          <p style="margin:0 0 6px;"><strong>1ª tentativa (boleto):</strong> <code>r"Data Vencimento:\s*(\d{2})/(\d{2})/(\d{4})"</code> (aceita quebra de linha com <code>\s*</code>).</p>
+          <p style="margin:0 0 8px;"><strong>2ª tentativa (cabeçalho):</strong> <code>r"\d{2}/\d{4}\s+(\d{2})/(\d{2})/(\d{4})\s+R\$\s*[0-9.,]+"</code> (ex.: <code>08/2025 14/08/2025 R$ 265,29</code>).</p>
+          <div class="pipeline">
+            <div class="step">"14/08/2025" → d="14", m="08", y="2025"</div><span class="arrow">→</span>
+            <div class="step"><code>f"{y}-{m}-{d}"</code></div><span class="arrow">→</span>
+            <div class="step">"2025-08-14"</div>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="box-cover">
+            <h4>Exemplos que COBRE</h4>
+            <ul>
+              <li><code>Data Vencimento:\n14/08/2025</code> → <code>"2025-08-14"</code></li>
+              <li><code>08/2025 14/08/2025 R$ 265,29</code> → <code>"2025-08-14"</code></li>
+            </ul>
+          </div>
+          <div class="box-nocover">
+            <h4>Exemplos que NÃO COBRE</h4>
+            <ul>
+              <li>Rótulo <code>"Vencimento: 14/08/2025"</code> (sem <code>"Data"</code>) se não houver a linha do cabeçalho com <code>R$</code>.</li>
+              <li>Ano com 2 dígitos (<code>14/08/25</code>) ou mês por extenso.</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <!-- 4.7 subtotal e total_a_pagar -->
+      <article class="field-card" id="campo-totais" data-tags="positivo">
+        <div class="field-header">
+          <div class="field-name">subtotal &amp; total_a_pagar</div>
+          <div class="badges">
+            <span class="badge badge-type">float</span>
+            <span class="badge badge-pos">Sempre abs (&gt;= 0)</span>
+          </div>
+        </div>
+        <p>
+          <strong><code>subtotal</code>:</strong> soma todas as linhas que casam <code>r"Subtotal\s+[A-Za-zÀ-ÿ]+\s+([0-9.,]+)"</code> com <code>abs(...)</code>. Se resultar em <code>0.0</code>, usa <code>total_a_pagar</code>.<br/>
+          <strong><code>total_a_pagar</code>:</strong> 1º tenta <code>r"Valor do Documento:\s*R\$\s*([0-9.,]+)"</code>; 2º tenta <code>r"\bTOTAL\s*\n\s*([0-9.,]+)"</code> (com <code>abs(...)</code>).
+        </p>
+        <div class="grid-2">
+          <div class="box-cover">
+            <h4>Exemplos que COBRE</h4>
+            <ul>
+              <li><code>Subtotal Faturamento 879,46</code> + <code>Subtotal Outros 339,57</code> → <code>subtotal: 1219.03</code>.</li>
+              <li><code>Valor do Documento: R$ 265,29</code> → <code>total_a_pagar: 265.29</code>.</li>
+            </ul>
+          </div>
+          <div class="box-nocover">
+            <h4>Exemplos que NÃO COBRE</h4>
+            <ul>
+              <li><code>Subtotal de Serviços 50,00</code> (mais de 1 palavra após <code>Subtotal</code>).</li>
+              <li>Fatura sem <code>Valor do Documento: R$ ...</code> onde o total aparece na mesma linha ou <strong>acima</strong> da palavra <code>TOTAL</code>.</li>
+              <li>Valores negativos em <code>subtotal</code> ou <code>total_a_pagar</code> (<code>abs</code> sempre positivará).</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <!-- 4.8 leitura_anterior / atual / tipo -->
+      <article class="field-card" id="campo-leituras" data-tags="data">
+        <div class="field-header">
+          <div class="field-name">leitura_anterior, leitura_atual &amp; tipo_ligacao_eletrica</div>
+          <div class="badges">
+            <span class="badge badge-type">str (ISO-8601) &amp; str</span>
+            <span class="badge badge-date">Micro-análise Dia/Mês/Ano/Fuso</span>
+          </div>
+        </div>
+        <div class="micro-box">
+          <h4>Regex conjunta obrigatória para os 3 campos</h4>
+          <pre>r"(TRIF[AÁ]SICO|MONOF[AÁ]SICO|BIF[AÁ]SICO)\s+(\d{2})/(\d{2})/(\d{4})\s+(\d{2})/(\d{2})/(\d{4})"</pre>
+          <div class="pipeline">
+            <div class="step">"Residencial TRIFÁSICO 03/07/2025 04/08/2025 32 03/09/2025"</div><span class="arrow">→</span>
+            <div class="step"><code>tipo: "TRIFÁSICO"</code></div>
+            <div class="step"><code>leitura_anterior: "2025-07-03T00:00:00-03:00"</code></div>
+            <div class="step"><code>leitura_atual: "2025-08-04T00:00:00-03:00"</code></div>
+          </div>
+          <p style="margin:6px 0 0;font-size:13px;color:var(--text-muted);">Hora <code>T00:00:00</code> e fuso <code>-03:00</code> são fixos; a 3ª data (próxima leitura <code>03/09/2025</code>) é ignorada.</p>
+        </div>
+        <div class="grid-2">
+          <div class="box-cover">
+            <h4>Exemplos que COBRE</h4>
+            <ul>
+              <li><code>TRIFÁSICO</code>, <code>MONOFÁSICO</code>, <code>BIFÁSICO</code> (com ou sem acento, convertidos com <code>.upper()</code>).</li>
+              <li>Datas com quebra de espaço/linha entre si.</li>
+            </ul>
+          </div>
+          <div class="box-nocover">
+            <h4>Exemplos que NÃO COBRE</h4>
+            <ul>
+              <li>Se o tipo de ligação não estiver colado imediatamente antes das duas datas, <strong>os 3 campos ficam <code>""</code></strong> (não há fallback pela tabela de medidores).</li>
+              <li>Tipos compostos como <code>"BIFÁSICO 2 FIOS"</code> ou fusos diferentes de <code>-03:00</code>.</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <!-- 4.9 cnpj-cpf -->
+      <article class="field-card" id="campo-cnpj" data-tags="all">
+        <div class="field-header">
+          <div class="field-name">cnpj-cpf <small style="color:var(--text-muted);font-weight:400;">(+ alias automático <code>cnpj_cpf</code>)</small></div>
+          <div class="badges">
+            <span class="badge badge-type">Dict[bool, str]</span>
+          </div>
+        </div>
+        <p><strong>Regex:</strong> <code>r"CPF/CNPJ:\s*([0-9.\-\/]+)"</code>. Primeiro busca dentro do bloco cadastral (até 6 linhas após a âncora de leitura); se ausente, busca no texto completo. Conta apenas dígitos (<code>\D</code> removido): <strong>11 dígitos</strong> = CPF; <strong>14 dígitos</strong> = CNPJ; campo não usado recebe literalmente a string <code>"undefined"</code>.</p>
+        <div class="grid-2">
+          <div class="box-cover">
+            <h4>Exemplos que COBRE</h4>
+            <ul>
+              <li><code>CPF/CNPJ: 105.432.952-49</code> → <code>cpf: true, cnpj: false, cpf_valor: "105.432.952-49", cnpj_valor: "undefined"</code>.</li>
+              <li><code>CPF/CNPJ: 07.140.525/0001-71</code> → <code>cnpj: true, cnpj_valor: "07.140.525/0001-71", cpf_valor: "undefined"</code>.</li>
+              <li>Documento sem máscara com 11 ou 14 dígitos (ex.: <code>10543295249</code>).</li>
+            </ul>
+          </div>
+          <div class="box-nocover">
+            <h4>Exemplos que NÃO COBRE</h4>
+            <ul>
+              <li>CPF/CNPJ mascarado com asteriscos/letras (ex.: <code>***.432.952-**</code> → menos de 11 dígitos → ambos <code>"undefined"</code>).</li>
+              <li>Rótulo apenas <code>CNPJ:</code> ou apenas <code>CPF:</code> (protege contra pegar o CNPJ da Enel no cabeçalho).</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <!-- 4.10 endereco -->
+      <article class="field-card" id="campo-endereco" data-tags="all">
+        <div class="field-header">
+          <div class="field-name">endereco</div>
+          <div class="badges">
+            <span class="badge badge-type">{"nome da empresa", "endereço", "cep"}</span>
+          </div>
+        </div>
+        <p><strong>Micro-análise:</strong> Localiza a linha âncora <code>(TRIF[AÁ]SICO|MONOF[AÁ]SICO|BIF[AÁ]SICO)\s+\d{2}/\d{2}/\d{4}</code>. A linha seguinte vira <code>nome da empresa</code>; as linhas de <code>+2</code> a <code>+7</code> até <code>CPF/CNPJ:</code> (pulando a linha de <code>CEP:</code>) são unidas em <code>endereço</code>. Se o CEP não estiver no bloco, o fallback busca <code>CEP:\s*(\d{5}-\d{3})</code> no texto inteiro descartando <code>"60135-040"</code> (sede Enel Ceará).</p>
+        <div class="grid-2">
+          <div class="box-cover">
+            <h4>Exemplos que COBRE</h4>
+            <ul>
+              <li>Bloco padrão Enel CE com até 5 linhas entre nome e <code>CPF/CNPJ:</code>.</li>
+              <li>CEP no formato <code>XXXXX-XXX</code>, diferenciando do CEP da Enel CE (<code>60135-040</code>).</li>
+            </ul>
+          </div>
+          <div class="box-nocover">
+            <h4>Exemplos que NÃO COBRE</h4>
+            <ul>
+              <li>Razão social quebrada em 2 linhas (a 2ª linha entra em <code>"endereço"</code>).</li>
+              <li>CEP sem hífen (<code>60150190</code>) ou concessionária de outro estado no fallback (só exclui <code>60135-040</code>).</li>
+              <li>Ausência da linha âncora de tipo de fornecimento deixa <code>nome da empresa</code> e <code>endereço</code> como <code>""</code>.</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <!-- 4.11 CIP / juros / multa -->
+      <article class="field-card" id="campo-encargos" data-tags="positivo negativo">
+        <div class="field-header">
+          <div class="field-name">CIP_ILUM_PUB_PREF_MUNICIPAL, juros_valor &amp; multa_valor</div>
+          <div class="badges">
+            <span class="badge badge-type">float</span>
+            <span class="badge badge-both">Tabela preserva sinal / Fallback abs</span>
+          </div>
+        </div>
+        <p>
+          Na tabela (<code>raw_item_lines</code>):<br/>
+          • <code>r"CIP ILUM PUB PREF MUNICIPAL\s+(-?[0-9.,]+-?)"</code><br/>
+          • <code>r"Juros Morat[oó]rios\s+(-?[0-9.,]+-?)"</code><br/>
+          • <code>r"^Multa\s+(-?[0-9.,]+-?)"</code><br/>
+          Se permanecer <code>0.0</code>, faz fallback no texto completo com <code>abs(...)</code> (usando <code>\bMulta\s+([0-9.,]+)</code>).
+        </p>
+        <div class="grid-2">
+          <div class="box-cover">
+            <h4>Exemplos que COBRE</h4>
+            <ul>
+              <li><code>CIP ILUM PUB PREF MUNICIPAL 65,09</code> → <code>65.09</code> (e <code>10,50-</code> na tabela → <code>-10.5</code>).</li>
+              <li><code>Juros Moratórios 0,45</code> → <code>0.45</code> (aceita com ou sem acento em Moratórios).</li>
+              <li><code>Multa 6,70</code> no início da linha → <code>6.7</code>.</li>
+            </ul>
+          </div>
+          <div class="box-nocover">
+            <h4>Exemplos que NÃO COBRE</h4>
+            <ul>
+              <li>Nomes diferentes: <code>COSIP</code>, <code>Contribuição Ilum. Pública</code>, <code>Juros de Mora</code>, <code>Multa Moratória</code>.</li>
+              <li>Texto entre rótulo e valor (ex.: <code>Multa Ref. 04/2025 6,70</code>).</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <!-- 4.12 lista_itens_fatura -->
+      <article class="field-card" id="campo-lista-itens" data-tags="positivo negativo lista">
+        <div class="field-header">
+          <div class="field-name">lista_itens_fatura</div>
+          <div class="badges">
+            <span class="badge badge-type">List[{"nome_item": str, "valor": float, "valor_positivo": bool}]</span>
+            <span class="badge badge-both">Positivo (true) &amp; Negativo (false)</span>
+          </div>
+        </div>
+        <div class="micro-box">
+          <h4>Regra definitiva de Sinal + Janela da Tabela</h4>
+          <p style="margin:0 0 6px;">
+            <strong>Invariante:</strong> <code>valor &lt; 0</code> → <strong><code>valor</code> negativo</strong> e <code>valor_positivo: false</code>.
+            <code>valor &gt;= 0</code> → <strong><code>valor</code> positivo (ou <code>0.0</code>)</strong> e <code>valor_positivo: true</code>.
+          </p>
+          <p style="margin:0 0 6px;">
+            <strong>Janela:</strong> linhas entre <code>"itens de fatura"</code> e <code>"subtotal faturamento"</code> (case-insensitive), ignorando linhas de cabeçalho que contenham <code>"com tributos"</code>, <code>"valor (r$)"</code>, <code>"pis/cofins"</code>, <code>"base calc"</code>, <code>"icms"</code>, <code>"alíquota"</code>, <code>"tarifa"</code> ou <code>"unit (r$)"</code>.
+          </p>
+          <pre>r"^(.*?)\s+kWh\s+(-?[0-9.,]+-?)\s+(-?[0-9.,]+-?)\s+(-?[0-9.,]+-?)"</pre>
+          <div class="pipeline">
+            <div class="step">"Energia Atv Inj TE oUC 10/2024 mPT kWh 394 0,36181- 142,88- ..."</div><span class="arrow">→</span>
+            <div class="step"><code>valor: -142.88</code></div>
+            <div class="step"><code>valor_positivo: false</code></div>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="box-cover">
+            <h4>Exemplos que COBRE</h4>
+            <ul>
+              <li>Todos os itens de energia com unidade <code>kWh</code> (consumo, fornecida, injetada TE/TUSD, adicionais e compensações de bandeira).</li>
+              <li><code>CIP ILUM PUB PREF MUNICIPAL</code>, <code>Juros Moratórios</code> e <code>Multa</code> dentro da janela.</li>
+              <li>Valores negativos à direita (<code>142,88-</code> → <code>-142.88</code> / <code>false</code>) ou à esquerda (<code>-50,00</code> → <code>-50.0</code> / <code>false</code>).</li>
+              <li>Soma dos itens fecha com <code>total_a_pagar</code> em faturas padrão (<code>265.29</code> e <code>1219.03</code>).</li>
+            </ul>
+          </div>
+          <div class="box-nocover">
+            <h4>Exemplos que NÃO COBRE</h4>
+            <ul>
+              <li>Lançamentos sem <code>kWh</code> que não sejam CIP/Juros/Multa — ex. real: <code>DOACAO ART CIDADA JUAZEIRO 85 99191 1643 2,00</code>.</li>
+              <li>Unidades diferentes de <code>kWh</code> (ex.: <code>kW</code>, <code>kVArh</code>), parcelamentos, taxas de religação e serviços de terceiros.</li>
+              <li>Itens listados <strong>após</strong> <code>Subtotal Faturamento</code>.</li>
+              <li>Itens cujo nome contenha palavra do filtro de cabeçalho (ex.: <code>"tarifa"</code>, <code>"icms"</code>) ou nome quebrado em 2 linhas antes de <code>kWh</code>.</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- SEÇÃO 5: EXEMPLOS REAIS -->
+    <section class="block" id="sec-exemplos-reais">
+      <h2 class="section-title">5. Exemplos Completos de Faturas Reais</h2>
+      <div class="card">
+        <h3 class="sub-title" style="margin-top:0;">Exemplo 1: Fatura com Créditos Negativos de Meses Anteriores (<code>ENEL RENAISSANCE MICHELANGELO 01.25.pdf</code>)</h3>
+        <pre>{
+  "creditos_valor": -5986.62,
+  "energia_atv_inj_TE_valor": [
+    { "mes": 10, "ano": 2024, "valor": -142.88 },
+    { "mes": 11, "ano": 2024, "valor": -2440.85 }
+  ],
+  "energia_atv_inj_TUSD_valor": [
+    { "mes": 10, "ano": 2024, "valor": -188.19 },
+    { "mes": 11, "ano": 2024, "valor": -3214.7 }
+  ],
+  "subtotal": 1219.03,
+  "total_a_pagar": 1219.03,
+  "lista_itens_fatura": [
+    { "nome_item": "Energia Ativa Fornecida TE", "valor": 2594.6, "valor_positivo": true },
+    { "nome_item": "Energia Ativa Fornecida TUSD", "valor": 4271.48, "valor_positivo": true },
+    { "nome_item": "Energia Atv Inj TE oUC 10/2024 mPT", "valor": -142.88, "valor_positivo": false },
+    { "nome_item": "Energia Atv Inj TE oUC 11/2024 mPT", "valor": -2440.85, "valor_positivo": false },
+    { "nome_item": "Energia Atv Inj TUSD oUC 10/2024 mPT", "valor": -188.19, "valor_positivo": false },
+    { "nome_item": "Energia Atv Inj TUSD oUC 11/2024 mPT", "valor": -3214.7, "valor_positivo": false },
+    { "nome_item": "CIP ILUM PUB PREF MUNICIPAL", "valor": 339.57, "valor_positivo": true }
+  ]
+}</pre>
+
+        <h3 class="sub-title">Exemplo 2: Limitação Real de Item Não Coberto (<code>Sociedada beneficente praia 04.25.pdf</code>)</h3>
+        <pre>CIP ILUM PUB PREF MUNICIPAL 307,83 0,00 0,00 0,00% 0,00
+DOACAO ART CIDADA JUAZEIRO 85 99191
+1643
+2,00 0,00 0,00 0,00% 0,00   ← IGNORADO em lista_itens_fatura (sem kWh e fora de CIP/Juros/Multa)
+Juros Moratórios 0,08 0,00 0,00 0,00% 0,00
+Multa 4,85 0,00 0,00 0,00% 0,00
+Subtotal Faturamento 287,89
+Subtotal Outros 314,76         ← Inclui os R$ 2,00 da doação (307,83 + 2,00 + 0,08 + 4,85)</pre>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+  (function () {
+    const searchInput = document.getElementById("searchInput");
+    const filterButtons = Array.from(document.querySelectorAll("#filterPills .pill-btn"));
+    const cards = Array.from(document.querySelectorAll(".field-card"));
+    const emptyState = document.getElementById("emptyState");
+    let activeFilter = "all";
+
+    function applyFilters() {
+      const term = (searchInput.value || "").trim().toLowerCase();
+      let visibleCount = 0;
+
+      cards.forEach((card) => {
+        const tags = (card.getAttribute("data-tags") || "").toLowerCase().split(/\s+/);
+        const text = card.textContent.toLowerCase();
+        const matchesTag = activeFilter === "all" || tags.includes(activeFilter);
+        const matchesText = !term || text.includes(term);
+
+        if (matchesTag && matchesText) {
+          card.classList.remove("hidden");
+          visibleCount += 1;
+        } else {
+          card.classList.add("hidden");
+        }
+      });
+
+      emptyState.style.display = visibleCount === 0 ? "block" : "none";
+    }
+
+    filterButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        filterButtons.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        activeFilter = btn.getAttribute("data-filter") || "all";
+        applyFilters();
+      });
+    });
+
+    searchInput.addEventListener("input", applyFilters);
+  })();
+</script>
+</body>
+</html>
+

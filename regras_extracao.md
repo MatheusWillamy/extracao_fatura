@@ -65,7 +65,7 @@ A estrutura de saída foi desenhada para compatibilidade total com os fluxos do 
     },
     {
       "nome_item": "Adic. Band. Vermelha Comp.",
-      "valor": 29.07,
+      "valor": -29.07,
       "valor_positivo": false
     }
   ]
@@ -244,8 +244,8 @@ A estrutura de saída foi desenhada para compatibilidade total com os fluxos do 
 * **Definição:** Lista completa de todos os itens faturados discriminados na tabela de itens da fatura.
 * **Estrutura de cada item:**
   - `"nome_item"`: Nome integral do item tal como consta no documento.
-  - `"valor"`: Valor financeiro positivo (`float`, em módulo).
-  - `"valor_positivo"`: Booleano (`true` se for item a pagar / débito, `false` se for crédito / compensação com sinal negativo `-`).
+  - `"valor"`: Valor financeiro do item em R$ (`float`), preservando o sinal negativo quando for crédito / compensação (ex: `-145.86`).
+  - `"valor_positivo"`: Booleano (`true` se for item a pagar / débito / valor não negativo, `false` se for crédito / compensação com valor negativo `-`).
 * **Exemplo:**
   ```json
   [
@@ -261,12 +261,12 @@ A estrutura de saída foi desenhada para compatibilidade total com os fluxos do 
     },
     {
       "nome_item": "Adic. Band. Vermelha Comp.",
-      "valor": 29.07,
+      "valor": -29.07,
       "valor_positivo": false
     },
     {
       "nome_item": "Energia Atv Inj TE oUC 08/2025 mPT GD2",
-      "valor": 145.86,
+      "valor": -145.86,
       "valor_positivo": false
     }
   ]
